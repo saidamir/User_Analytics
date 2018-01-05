@@ -1,0 +1,97 @@
+-- I created PostgreSQL database using the provided cvs files.
+-- schema:  
+-- customers: (
+id integer,
+  first_name text,
+  last_name character varying,
+  email character varying,
+  orders_count character varying,
+  created_at timestamp without time zone,
+  updated_at character varying)
+-- orders: (
+  id integer,
+  customer_id character varying,
+  mc_cid character varying,
+  created_at timestamp without time zone,
+  updated_at character varying)
+-- order items (
+  id integer,
+  order_id character varying,
+  product_id integer,
+  quantity integer,
+  created_at timestamp without time zone,
+  updated_at character varying)
+-- products: (
+  id integer,
+  name character varying,
+  category character varying,
+  price integer,
+  created_at character varying,
+  updated_at character varying
+)
+
+
+-- Revenues query
+-- summarizing revenues by joining tables
+select count(product_id),
+to_char(o.created_at, 'YYYY-MM'),
+sum(o.quantity * p.price) as revenue
+from orders_items o
+join products p
+on o.product_id = p.id
+group by 2
+order by 2;
+
+
+--Orders_by_cohorts query
+-- summarizing count of orders by cohorts and dates of purchase
+
+select coh.cohort, coh.yearmonthPurchase,
+count(coh.customer_id)
+from (
+
+SELECT o.customer_id, 
+       to_char(o.created_at,'YYYY-MM') yearmonthPurchase,
+       --o.transactionamount, 
+       to_char(c.cohortdate, 'YYYY-MM') cohort
+FROM   orders o
+       JOIN (SELECT customer_id, 
+                    Min(created_at) AS cohortDate 
+             FROM   orders o
+             GROUP  BY customer_id) AS c
+         ON o.customer_id = c.customer_id
+   ) coh   
+group by 1,2
+order by 1
+         ; 
+
+
+-- Revenue_by_cohorts
+-- summarizing revenues by cohorts and dates of purchase
+
+
+select coh.cohort, rev1.yearmonthPurchase, sum(rev1.revenue)  from
+(
+select o.customer_id, rev.revenue, to_char(o.created_at,'YYYY-MM') yearmonthPurchase 
+from orders o join 
+(
+	SELECT oi.order_id, oi.quantity * p.price as revenue from orders_items oi
+	join products p
+	ON oi.product_id = p.id) rev
+       on rev.order_id::int = o.id
+       ) rev1
+ join (
+
+SELECT o1.customer_id, 
+       to_char(o1.created_at,'YYYY-MM') yearmonthPurchase,
+       to_char(c.cohortdate, 'YYYY-MM') cohort
+FROM   orders o1
+       JOIN (SELECT customer_id, 
+                    Min(created_at) AS cohortDate 
+             FROM   orders o1
+             GROUP  BY customer_id) AS c
+         ON o1.customer_id = c.customer_id
+   )  coh
+ on rev1.customer_id = coh.customer_id    
+ group by 1,2
+ order by 1 

@@ -16,4 +16,7 @@ Two charts in .png format
 Two csv files containing tables
 Three Jupiter Notebook files with the work.
 I did all the work in Jupyter Notebooks which can also be looked at the following url (gists). I could also do the work in Mode using SQL and Python.
+
 ![orders_by_month_year](https://user-images.githubusercontent.com/20246711/34623872-d871ab2c-f207-11e7-8a1b-c244190d4eaa.png)
+
+![revenue_by_month](https://user-images.githubusercontent.com/20246711/34624029-849a4fa8-f208-11e7-9759-a399f6d61eb4.png)
